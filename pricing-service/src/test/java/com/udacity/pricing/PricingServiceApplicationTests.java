@@ -35,7 +35,7 @@ public class PricingServiceApplicationTests {
 		String resourceUrl = "http://localhost:"+this.port+"/graphql";
 		String response = client.post()
 				.uri(resourceUrl)
-//				.contentType(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
 				.body(BodyInserters.fromMultipartData("query","{findPriceForVehicleId(vehicleid:2) {price}}"))
 				.retrieve()
 				.bodyToMono(String.class)
