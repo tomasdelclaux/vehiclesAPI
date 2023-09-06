@@ -1,0 +1,10 @@
+type Price {
+    id: ID!
+    currency: String!
+    price: Float!
+    vehicleid: Float!
+}
+
+type Query {
+    findPriceForVehicleId(vehicleid:Float!): Price!
+}
