@@ -31,12 +31,13 @@ public class PriceClient {
      *   service is down.
      */
     public String getPrice(Long vehicleId) {
+        String query = "{findPriceForVehicleId(vehicleid:"+vehicleId+") {price}}";
         try {
             Price price = client
                     .get()
                     .uri(uriBuilder -> uriBuilder
                             .path("services/price/")
-                            .queryParam("vehicleId", vehicleId)
+                            .queryParam("vehicleId", query)
                             .build()
                     )
                     .retrieve().bodyToMono(Price.class).block();
