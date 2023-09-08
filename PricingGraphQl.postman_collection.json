@@ -14,7 +14,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "{findPriceForVehicleId(vehicleid:2) {\n  price\n}}",
+						"query": "{findPriceForVehicleId(vehicleid:2) {currency, price, vehicleid}}",
 						"variables": ""
 					}
 				},
@@ -62,15 +62,17 @@
 			"response": []
 		},
 		{
-			"name": "Get Cars Copy",
+			"name": "Create Car",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "{findPriceForVehicleId(vehicleid:2) {\n  price\n}}",
-						"variables": ""
+					"mode": "raw",
+					"raw": "{\n  \"condition\": \"USED\",\n  \"details\": {\n    \"body\": \"sport\",\n    \"engine\": \"v8\",\n    \"externalColor\": \"blue\",\n    \"fuelType\": \"gasoline\",\n    \"manufacturer\": {\n      \"code\": 101\n    },\n    \"mileage\": 1000,\n    \"model\": \"vcx\",\n    \"modelYear\": 2020,\n    \"numberOfDoors\": 4,\n    \"productionYear\": 2022\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
 					}
 				},
 				"url": {
@@ -82,6 +84,75 @@
 					"port": "8080",
 					"path": [
 						"cars"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/cars/1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/cars/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"cars",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/cars",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"condition\": \"USED\",\n  \"details\": {\n    \"body\": \"sport\",\n    \"engine\": \"v8\",\n    \"externalColor\": \"green\",\n    \"fuelType\": \"diesel\",\n    \"manufacturer\": {\n      \"code\": 101,\n      \"name\": \"BMW\"\n    },\n    \"mileage\": 200,\n    \"model\": \"cls\",\n    \"modelYear\": 1980,\n    \"numberOfDoors\": 2,\n    \"productionYear\": 1990\n  }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/cars/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"cars",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/cars/1",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/cars/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"cars",
+						"1"
 					]
 				}
 			},
