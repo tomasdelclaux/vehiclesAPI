@@ -28,6 +28,7 @@ public class CarService {
      * @return a list of all vehicles in the CarRepository
      */
     public List<Car> list() {
+        System.out.println("Getting the list of cars");
         return repository.findAll();
     }
 

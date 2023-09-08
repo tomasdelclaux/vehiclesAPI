@@ -40,6 +40,7 @@ public class VehiclesApiApplication {
         };
     }
 
+
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();

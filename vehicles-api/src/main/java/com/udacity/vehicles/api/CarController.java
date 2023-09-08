@@ -47,6 +47,7 @@ class CarController {
     Resources<Resource<Car>> list() {
         List<Resource<Car>> resources = carService.list().stream().map(assembler::toResource)
                 .collect(Collectors.toList());
+        System.out.println(resources);
         return new Resources<>(resources,
                 linkTo(methodOn(CarController.class).list()).withSelfRel());
     }
@@ -79,7 +80,8 @@ class CarController {
          * TODO: Use the `assembler` on that saved car and return as part of the response.
          *   Update the first line as part of the above implementing.
          */
-        Resource<Car> resource = assembler.toResource(new Car());
+        Car newCar = this.carService.save(car);
+        Resource<Car> resource = assembler.toResource(newCar);
         return ResponseEntity.created(new URI(resource.getId().expand().getHref())).body(resource);
     }
 
