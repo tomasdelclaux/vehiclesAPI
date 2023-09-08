@@ -67,6 +67,7 @@ public class CarService {
          */
         Car foundCar = car.get();
         String price = this.priceClient.getPrice(id);
+        System.out.println("price is " + price);
         if(price != "(consult price)"){
             foundCar.setPrice(price);
         }

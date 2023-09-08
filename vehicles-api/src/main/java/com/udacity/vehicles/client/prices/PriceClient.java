@@ -2,8 +2,15 @@ package com.udacity.vehicles.client.prices;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Implements a class to interface with the Pricing Client for price data.
@@ -32,21 +39,52 @@ public class PriceClient {
      */
     public String getPrice(Long vehicleId) {
         String query = "{findPriceForVehicleId(vehicleid:"+vehicleId+") {price}}";
+        String resourceUrl = "http://localhost:"+8762+"/graphql";
+        System.out.println("sending graphql request");
         try {
-            Price price = client
-                    .get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("services/price/")
-                            .queryParam("vehicleId", query)
-                            .build()
-                    )
-                    .retrieve().bodyToMono(Price.class).block();
+            String price = client
+                    .post()
+                    .uri(resourceUrl)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(BodyInserters.fromMultipartData("query","{findPriceForVehicleId(vehicleid:"+vehicleId+") {currency,price,vehicleid}}"))
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
 
-            return String.format("%s %s", price.getCurrency(), price.getPrice());
+
+            System.out.println("Printing response !!");
+            System.out.println(price);
+            return String.format("%s %s", getCurrency(price), getPrice(price));
 
         } catch (Exception e) {
+            System.out.println(e);
             log.error("Unexpected error retrieving price for vehicle {}", vehicleId, e);
         }
         return "(consult price)";
+    }
+
+    public String getCurrency(String response){
+        Pattern pattern = Pattern.compile("currency\":\"(.*?)\",");
+        Matcher matcher = pattern.matcher(response);
+        if(matcher.find()){
+            System.out.println(matcher.group(1));
+            return matcher.group(1);
+        }
+        else{
+            return null;
+        }
+    }
+
+    public String getPrice(String response){
+        Pattern pattern = Pattern.compile("price\":(.*?),");
+        Matcher matcher = pattern.matcher(response);
+        if(matcher.find()){
+            System.out.println(matcher.group(1));
+            return matcher.group(1);
+        }
+        else{
+            return null;
+        }
     }
 }
