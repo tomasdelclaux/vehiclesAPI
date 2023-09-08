@@ -4,13 +4,12 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Test;
 import com.udacity.vehicles.client.maps.MapsClient;
 import com.udacity.vehicles.client.prices.PriceClient;
 import com.udacity.vehicles.domain.Condition;
@@ -21,8 +20,11 @@ import com.udacity.vehicles.domain.manufacturer.Manufacturer;
 import com.udacity.vehicles.service.CarService;
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
@@ -30,9 +32,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Implements testing of the CarController class.
@@ -63,7 +67,7 @@ public class CarControllerTest {
      */
     @Before
     public void setup() {
-        Car car = getCar();
+        Car car = getCarOne();
         car.setId(1L);
         given(carService.save(any())).willReturn(car);
         given(carService.findById(any())).willReturn(car);
@@ -74,16 +78,16 @@ public class CarControllerTest {
      * Tests for successful creation of new car in the system
      * @throws Exception when car creation fails in the system
      */
-//    @Test
-//    public void createCar() throws Exception {
-//        Car car = getCar();
-//        mvc.perform(
-//                post(new URI("/cars"))
-//                        .content(json.write(car).getJson())
-//                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-//                        .accept(MediaType.APPLICATION_JSON_UTF8))
-//                .andExpect(status().isCreated());
-//    }
+    @Test
+    public void createCar() throws Exception {
+        Car car = getCarOne();
+        mvc.perform(
+                post(new URI("/cars"))
+                        .content(json.write(car).getJson())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isCreated());
+    }
 
     /**
      * Tests if the read operation appropriately returns a list of vehicles.
@@ -96,7 +100,16 @@ public class CarControllerTest {
          *   the whole list of vehicles. This should utilize the car from `getCar()`
          *   below (the vehicle will be the first in the list).
          */
+        MvcResult result = mvc.perform(
+                        get(new URI("/cars"))
+                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
 
+        String content = result.getResponse().getContentAsString();
+        System.out.println(content);
+        Assertions.assertEquals(content.contains("Impala"), true);
+        Assertions.assertEquals(content.contains("32280"), true);
     }
 
     /**
@@ -109,7 +122,43 @@ public class CarControllerTest {
          * TODO: Add a test to check that the `get` method works by calling
          *   a vehicle by ID. This should utilize the car from `getCar()` below.
          */
+        MvcResult result = mvc.perform(
+                        get(new URI("/cars/1"))
+                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        System.out.println(content);
+        Assertions.assertEquals(content.contains("Impala"), true);
+        Assertions.assertEquals(content.contains("32280"), true);
+        deleteCar();
     }
+
+    @Test
+    public void updateCar() throws Exception {
+        /**
+         * TODO: Add a test to check that the `get` method works by calling
+         *   a vehicle by ID. This should utilize the car from `getCar()` below.
+         */
+        Car car = getCarTwo();
+        car.setCondition(Condition.NEW);
+        mvc.perform(
+                        put(new URI("/cars/2"))
+                                .content(json.write(car).getJson())
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is2xxSuccessful());
+        MvcResult result = mvc.perform(
+                        get(new URI("/cars/2"))
+                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+        String content = result.getResponse().getContentAsString();
+        System.out.println(content);
+        Assertions.assertEquals(content.contains("NEW"), true);
+    }
+
 
     /**
      * Tests the deletion of a single car by ID.
@@ -122,13 +171,32 @@ public class CarControllerTest {
          *   when the `delete` method is called from the Car Controller. This
          *   should utilize the car from `getCar()` below.
          */
+        Car car2 = getCarTwo();
+        car2.setId(2L);
+        carService.save(car2);
+        mvc.perform(
+                        delete(new URI("/cars/2"))
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isNoContent());
+        MvcResult result = mvc.perform(
+                        get(new URI("/cars/2"))
+                                .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        System.out.println(content);
+        Assertions.assertNotEquals(content.contains("Audi"), true);
+        Assertions.assertNotEquals(content.contains("12345"), true);
     }
+
 
     /**
      * Creates an example Car object for use in testing.
      * @return an example Car object
      */
-    private Car getCar() {
+    private Car getCarOne() {
         Car car = new Car();
         car.setLocation(new Location(40.730610, -73.935242));
         Details details = new Details();
@@ -144,7 +212,28 @@ public class CarControllerTest {
         details.setProductionYear(2018);
         details.setNumberOfDoors(4);
         car.setDetails(details);
+        car.setCondition(Condition.NEW);
+        return car;
+    }
+
+    private Car getCarTwo() {
+        Car car = new Car();
+        car.setLocation(new Location(40.730610, -73.935242));
+        Details details = new Details();
+        Manufacturer manufacturer = new Manufacturer(100, "Audi");
+        details.setManufacturer(manufacturer);
+        details.setModel("SQ");
+        details.setMileage(12345);
+        details.setExternalColor("blue");
+        details.setBody("sport");
+        details.setEngine("V8");
+        details.setFuelType("Diesel");
+        details.setModelYear(2019);
+        details.setProductionYear(2019);
+        details.setNumberOfDoors(4);
+        car.setDetails(details);
         car.setCondition(Condition.USED);
         return car;
     }
+
 }
